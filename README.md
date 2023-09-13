@@ -24,3 +24,6 @@ $ python -m venv metrics_venv
 $ cd metrics_venv && source bin/activate
 $ pip install asyncpg pandas pyarrow numpy matplotlib psutil loguru
 ```
+
+## TPC-DS Metrics Data
+![tpcds_metrics](https://github.com/binbjz/tpcds_pg/blob/master/tpcds_metrics_data.png)
