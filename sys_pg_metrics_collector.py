@@ -109,8 +109,9 @@ async def collect_pg_metrics(conn: PoolConnectionProxy):
     session_count = await conn.fetchval("SELECT count(*) FROM pg_stat_activity;")
     metrics["pg_session_count"] = session_count
 
-    # 收集数据库级别统计信息(这里仅收集主数据库作为示例)
-    db_stat = await conn.fetchrow("SELECT datname, xact_commit, xact_rollback FROM pg_stat_database LIMIT 1;")
+    # 收集数据库级别统计信息
+    db_stat = await conn.fetchrow("SELECT datname, xact_commit, xact_rollback FROM pg_stat_database "
+                                  "WHERE datname = 'tpcds' LIMIT 1;")
     metrics["pg_db_name"] = db_stat["datname"]
     metrics["pg_xact_commit"] = db_stat["xact_commit"]
     metrics["pg_xact_rollback"] = db_stat["xact_rollback"]
