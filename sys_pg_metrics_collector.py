@@ -79,25 +79,7 @@ def save_to_csv_pd(data: dict, filename: str):
         df.to_csv(filename, mode="w", header=True, index=False)
 
 
-def collect_system_metrics_sync():
-    """
-    使用psutil收集系统级别指标
-    :return: 返回一个包含各种系统性能指标的字典
-    """
-    cpu_info = psutil.cpu_times_percent(interval=None)
-    memory_info = psutil.virtual_memory()
-    io_info = psutil.disk_io_counters()
-    return {
-        "cpu_user": cpu_info.user,
-        "cpu_system": cpu_info.system,
-        "memory_used": memory_info.used,
-        "memory_free": memory_info.free,
-        "io_read": io_info.read_count,
-        "io_write": io_info.write_count
-    }
-
-
-async def collect_system_metrics_async():
+async def collect_system_metrics():
     """
     使用psutil收集系统级别指标
     :return: 返回一个包含各种系统性能指标的字典
@@ -237,7 +219,7 @@ async def main(csv_file: str):
                 break
 
             async with pool_pg.acquire() as conn:
-                system_metrics = await collect_system_metrics_async()
+                system_metrics = await collect_system_metrics()
                 pg_metrics = await collect_pg_metrics(conn)
                 all_metrics = {**system_metrics, **pg_metrics}
 
