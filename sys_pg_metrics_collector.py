@@ -26,8 +26,8 @@ from loguru import logger
 
 class CSVBuffer:
     """
-    更高效地使用pandas将数据写入到一个单一的 CSV 文件中,而不是每次循环都创建一个新的文件。同时,通过缓存和批量写入,
-    写入性能也会得到提升。
+    更高效地使用pandas将数据写入到一个单一的 CSV 文件中,而不是每次循环都创建一个新的文件。
+    同时,通过缓存和批量写入,写入性能也会得到提升。
     """
 
     def __init__(self, filename: str, buffer_size: int = 1000):
@@ -56,8 +56,8 @@ class CSVBuffer:
 def save_to_csv_pa(data: dict, filename: str):
     """
     使用pyarrow和pandas保存数据到CSV - 不追加数据到csv中,每次都是覆盖写入
-    :param data:
-    :param filename:
+    :param data: 要保存的数据,字典形式
+    :param filename: 保存文件的名称
     """
     df = pd.DataFrame([data])
     table = pa.table(df)
@@ -79,7 +79,7 @@ def save_to_csv_pd(data: dict, filename: str):
         df.to_csv(filename, mode="w", header=True, index=False)
 
 
-def collect_system_metrics():
+def collect_system_metrics_sync():
     """
     使用psutil收集系统级别指标
     :return: 返回一个包含各种系统性能指标的字典
@@ -95,6 +95,33 @@ def collect_system_metrics():
         "io_read": io_info.read_count,
         "io_write": io_info.write_count
     }
+
+
+async def collect_system_metrics_async():
+    """
+    使用psutil收集系统级别指标
+    :return: 返回一个包含各种系统性能指标的字典
+    """
+
+    def blocking_io():
+        """
+        一个同步函数,用于收集系统的性能指标。因为 psutil 库的方法是同步的,所以将这个函数设计为同步的。
+        :return:
+        """
+        cpu_info = psutil.cpu_times_percent(interval=None)
+        memory_info = psutil.virtual_memory()
+        io_info = psutil.disk_io_counters()
+        return {
+            "cpu_user": cpu_info.user,
+            "cpu_system": cpu_info.system,
+            "memory_used": memory_info.used,
+            "memory_free": memory_info.free,
+            "io_read": io_info.read_count,
+            "io_write": io_info.write_count
+        }
+
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, blocking_io)
 
 
 async def collect_pg_metrics(conn: PoolConnectionProxy):
@@ -153,7 +180,6 @@ def append_average_to_csv(filename: str):
     try:
         if Path(filename).exists():
             df = pd.read_csv(filename)
-
             avg_values_all = pd.Series(dtype="object", index=df.columns)
 
             for col in df.columns:
@@ -197,8 +223,8 @@ async def main(csv_file: str):
     pool_pg = await asyncpg.create_pool(
         host="localhost",
         port=5432,
-        user="pg_user",
-        password="pg_password",
+        user="postgres",
+        password="pg-auth",
         database="tpcds"
     )
 
@@ -211,7 +237,7 @@ async def main(csv_file: str):
                 break
 
             async with pool_pg.acquire() as conn:
-                system_metrics = collect_system_metrics()
+                system_metrics = await collect_system_metrics_async()
                 pg_metrics = await collect_pg_metrics(conn)
                 all_metrics = {**system_metrics, **pg_metrics}
 
@@ -221,7 +247,6 @@ async def main(csv_file: str):
                 # save_to_csv_pd(all_metrics, f"tpcds_metrics_data.csv")
 
                 csv_buffer.append(all_metrics)
-
             await asyncio.sleep(interval_time)
     except Exception as e:
         logger.error(f"发生错误: {e}")
