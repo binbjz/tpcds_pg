@@ -11,12 +11,9 @@ $ nohup /usr/bin/time python sys_pg_metrics_collector_opt.py > sys_pg_metrics_co
 # 查看执行进程
 $ ps -eo pid,user,pcpu,pmem,vsz,rss,tty,stat,start,time,etime,cmd | grep '[s]ys_pg_metrics_collector_opt.py'
 """
-import time
 import asyncio
 import asyncpg
 import psutil
-import pyarrow as pa
-import pyarrow.csv as pcsv
 import pandas as pd
 from collections import Counter
 from pathlib import Path
@@ -26,7 +23,7 @@ from loguru import logger
 
 class CSVBuffer:
     """
-    更高效地使用pandas将数据写入到一个单一的 CSV 文件中,而不是每次循环都创建一个新的文件。
+    更高效地将数据写入到一个单一的 CSV 文件中,而不是每次循环都创建一个新的文件。
     同时,通过缓存和批量写入,写入性能也会得到提升。
     """
 
@@ -44,7 +41,6 @@ class CSVBuffer:
     def flush(self):
         if self.buffer:
             df = pd.DataFrame(self.buffer)
-
             if self.header_written:
                 df.to_csv(self.filename, mode="a", header=False, index=False)
             else:
@@ -53,42 +49,16 @@ class CSVBuffer:
             self.buffer = []
 
 
-def save_to_csv_pa(data: dict, filename: str):
-    """
-    使用pyarrow和pandas保存数据到CSV - 不追加数据到csv中,每次都是覆盖写入
-    :param data: 要保存的数据,字典形式
-    :param filename: 保存文件的名称
-    """
-    df = pd.DataFrame([data])
-    table = pa.table(df)
-    with pa.OSFile(filename, "wb") as sink:
-        with pcsv.CSVWriter(sink, table.schema) as writer:
-            writer.write_table(table)
-
-
-def save_to_csv_pd(data: dict, filename: str):
-    """
-    使用pandas保存数据到CSV - 追加数据到csv中(效率不高)
-    :param data: 要保存的数据,字典形式
-    :param filename: 保存文件的名称
-    """
-    df = pd.DataFrame([data])
-    if Path(filename).exists():
-        df.to_csv(filename, mode="a", header=False, index=False)
-    else:
-        df.to_csv(filename, mode="w", header=True, index=False)
-
-
 async def collect_system_metrics():
     """
-    使用psutil收集系统级别指标
-    :return: 返回一个包含各种系统性能指标的字典
+    在异步环境中运行阻塞性代码,收集系统性能指标。
+    :return: 返回一个包含各种系统性能指标的字典。实际返回的是一个等待对象
     """
 
-    def blocking_io():
+    def collect_metrics_blocking():
         """
-        一个同步函数,用于收集系统的性能指标。因为 psutil 库的方法是同步的,所以将这个函数设计为同步的。
-        :return:
+        收集系统级别指标
+        :return: 返回一个包含各种系统性能指标的字典
         """
         cpu_info = psutil.cpu_times_percent(interval=None)
         memory_info = psutil.virtual_memory()
@@ -103,12 +73,12 @@ async def collect_system_metrics():
         }
 
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, blocking_io)
+    return await loop.run_in_executor(None, collect_metrics_blocking)
 
 
 async def collect_pg_metrics(conn: PoolConnectionProxy):
     """
-    使用asyncpg收集PG内部性能指标
+    异步地收集PG内部性能指标。
     :param conn: 数据库连接
     :return: 返回一个包含各种PG性能指标的字典
     """
@@ -184,7 +154,7 @@ def append_average_to_csv(filename: str):
 
 def check_process_running(process_name: str):
     """
-    检查是否有一个名为 process_name 的进程是否正在运行
+    检查是否有一个名为 process_name 的进程是否正在运行。
     """
     for proc in psutil.process_iter():
         try:
@@ -198,8 +168,6 @@ def check_process_running(process_name: str):
 
 async def main(csv_file: str):
     interval_time = 60
-    # max_run_time = 3600
-    start_time = time.time()
     monitored_file = "query_0.sql"
 
     pool_pg = await asyncpg.create_pool(
@@ -222,12 +190,6 @@ async def main(csv_file: str):
                 system_metrics = await collect_system_metrics()
                 pg_metrics = await collect_pg_metrics(conn)
                 all_metrics = {**system_metrics, **pg_metrics}
-
-                # 保存到CSV文件
-                # save_to_csv_pa(all_metrics, f"tpcds_metrics_data.csv")
-                # 保存到CSV文件
-                # save_to_csv_pd(all_metrics, f"tpcds_metrics_data.csv")
-
                 csv_buffer.append(all_metrics)
             await asyncio.sleep(interval_time)
     except Exception as e:
