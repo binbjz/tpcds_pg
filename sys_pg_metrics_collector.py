@@ -9,7 +9,7 @@ $ nohup /usr/bin/time python sys_pg_metrics_collector.py &
 $ nohup /usr/bin/time python sys_pg_metrics_collector.py > sys_pg_metrics_collector.log 2>&1 &
 
 # 查看执行进程
-$ ps -eo pid,user,pcpu,pmem,vsz,rss,tty,stat,start,time,etime,cmd | grep '[s]ys_pg_metrics_collector_opt.py'
+$ ps -eo pid,user,pcpu,pmem,vsz,rss,tty,stat,start,time,etime,cmd | grep '[s]ys_pg_metrics_collector.py'
 """
 import asyncio
 import asyncpg
