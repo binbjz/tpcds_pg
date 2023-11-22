@@ -4,9 +4,9 @@ $ python -m venv metrics_venv
 $ cd metrics_venv/ && source bin/activate
 $ pip install asyncpg pandas pyarrow psutil loguru
 
-$ nohup /usr/bin/time python sys_pg_metrics_collector_opt.py &
+$ nohup /usr/bin/time python sys_pg_metrics_collector.py &
 或者自定义输出文件名
-$ nohup /usr/bin/time python sys_pg_metrics_collector_opt.py > sys_pg_metrics_collector_opt.log 2>&1 &
+$ nohup /usr/bin/time python sys_pg_metrics_collector.py > sys_pg_metrics_collector.log 2>&1 &
 
 # 查看执行进程
 $ ps -eo pid,user,pcpu,pmem,vsz,rss,tty,stat,start,time,etime,cmd | grep '[s]ys_pg_metrics_collector_opt.py'
