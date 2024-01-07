@@ -6,7 +6,7 @@ support system, including queries and data maintenance.
 ## How to run it
 
 ```sh
-$ tmux new-session -s tpcds_session
+$ tmux new -s tpcds_session
 $ export PGPASSWORD='pg-password'
 $ ( /usr/bin/time psql -U <user_name> -d <db_name> -h <server_ip> -a -f <tpcds_query.sql> ) >tpcds.log 2>&1
 ```
