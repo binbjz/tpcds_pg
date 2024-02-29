@@ -6,7 +6,7 @@
 #
 # 2 tests, 0 failures
 # ==========================================================
-load "remove_last_pipe_opt.sh"
+load "remove_last_pipe.sh"
 
 setup() {
     TEST_DIR=$(mktemp -d)
