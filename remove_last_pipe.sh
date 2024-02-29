@@ -31,7 +31,8 @@ process_dat_files() {
 
     for dat_file in "$dat_dir"/*.dat; do
         process_dat_file "$dat_file"
-        ((count++))
+        # ((count++))
+        count=$((count + 1))
 
         if ((count % 20 == 0)); then
             wait -n
