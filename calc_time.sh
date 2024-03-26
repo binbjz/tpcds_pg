@@ -13,5 +13,5 @@ calculate_total_time() {
     echo "Total Time: $total_time ms"
 }
 
-log_file="/home/parallels/prac_bin/TPC-DS-Tool_v3.2.0/DSGen-software-code-3.2.0rc1/tpcds_query_0901/tpcds.log"
+log_file="/home/parallels/prac_bin/TPC-DS-Tool_v3.2.0/DSGen-software-code-3.2.0rc1/tpcds_query/tpcds.log"
 calculate_total_time "$log_file"

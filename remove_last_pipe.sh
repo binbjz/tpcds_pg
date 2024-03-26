@@ -48,7 +48,7 @@ process_dat_files() {
 # ==========================================================
 main() {
     local dat_dir
-    dat_dir="/home/parallels/prac_bin/TPC-DS-Tool_v3.2.0/DSGen-software-code-3.2.0rc1/tpcds_data_0903"
+    dat_dir="/home/parallels/prac_bin/TPC-DS-Tool_v3.2.0/DSGen-software-code-3.2.0rc1/tpcds_data"
 
     process_dat_files "$dat_dir" || {
         echo "处理 .dat 文件失败.."

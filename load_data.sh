@@ -4,7 +4,7 @@ DB_NAME="tpcds"
 DB_USER="postgres"
 DB_PASS="pg-auth"
 
-DAT_DIR="/home/parallels/prac_bin/TPC-DS-Tool_v3.2.0/DSGen-software-code-3.2.0rc1/tpcds_data_0903"
+DAT_DIR="/home/parallels/prac_bin/TPC-DS-Tool_v3.2.0/DSGen-software-code-3.2.0rc1/tpcds_data"
 MAX_JOBS=20
 
 # ==========================================================

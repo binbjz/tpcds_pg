@@ -19,8 +19,8 @@ generate_dat_data() {
     }
 
     for child in {1..4}; do
-        nohup /usr/bin/time ./dsdgen -scale "$SCALE" -dir ../tpcds_data_0903/ \
-            -parallel 4 -child "${child}" >>../../tpcds_data_0903.log 2>&1 &
+        nohup /usr/bin/time ./dsdgen -scale "$SCALE" -dir ../tpcds_data/ \
+            -parallel 4 -child "${child}" >>../../tpcds_data.log 2>&1 &
     done
 }
 
@@ -38,9 +38,9 @@ generate_query_data() {
         exit 1
     }
 
-    nohup /usr/bin/time ./dsqgen -output_dir ../tpcds_query_0901/ \
+    nohup /usr/bin/time ./dsqgen -output_dir ../tpcds_query/ \
         -input ../query_templates/templates.lst -scale 1 -dialect postgresql \
-        -directory ../query_templates/ >>../../tpcds_query_0901.log 2>&1 &
+        -directory ../query_templates/ >>../../tpcds_query.log 2>&1 &
 }
 
 generate_dat_data "${DSGEN_PATH}/tools" 10
