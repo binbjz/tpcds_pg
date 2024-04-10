@@ -20,8 +20,8 @@ $ nohup bash -c "export PGPASSWORD='pg-password'; /usr/bin/time psql -U <user_na
 ## Install dependency libraries in the virtual environment for the purpose of collecting DB performance metrics
 
 ```sh
-$ python -m venv metrics_venv
-$ cd metrics_venv && source bin/activate
+$ python -m venv tpcds_venv
+$ cd tpcds_venv && source bin/activate
 $ pip install asyncpg pandas pyarrow numpy matplotlib psutil loguru
 ```
 
