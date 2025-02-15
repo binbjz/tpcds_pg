@@ -17,12 +17,11 @@ $ ( /usr/bin/time psql -U <user_name> -d <db_name> -h <server_ip> -a -f <tpcds_q
 $ nohup bash -c "export PGPASSWORD='pg-password'; /usr/bin/time psql -U <user_name> -d <db_name> -h <server_ip> -a -f <tpcds_query.sql>" >tpcds.log 2>&1 &
 ```
 
-## Install dependency libraries in the virtual environment for the purpose of collecting DB performance metrics
+## Install dependency libraries in the virtual environment for the purpose of collecting DB performance metrics with uv
 
 ```sh
-$ python -m venv tpcds_venv
-$ cd tpcds_venv && source bin/activate
-$ pip install asyncpg pandas pyarrow numpy matplotlib psutil loguru
+$ uv venv --python 3.13.2
+$ uv sync
 ```
 
 ## TPC-DS Metrics Data
